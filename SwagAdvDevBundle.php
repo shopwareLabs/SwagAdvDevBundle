@@ -11,13 +11,15 @@ namespace SwagAdvDevBundle;
 
 use Doctrine\ORM\Tools\SchemaTool;
 use Shopware\Components\Plugin;
+use Shopware\Components\Plugin\Context\InstallContext;
+use Shopware\Components\Plugin\Context\UninstallContext;
 
 class SwagAdvDevBundle extends Plugin
 {
     /**
      * {@inheritdoc}
      */
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             'Enlight_Controller_Action_PreDispatch' => 'addTemplateDir',
@@ -32,7 +34,7 @@ class SwagAdvDevBundle extends Plugin
     /**
      * {@inheritdoc}
      */
-    public function install(Plugin\Context\InstallContext $context)
+    public function install(InstallContext $context): void
     {
         $this->updateSchema();
     }
@@ -40,7 +42,7 @@ class SwagAdvDevBundle extends Plugin
     /**
      * {@inheritdoc}
      */
-    public function uninstall(Plugin\Context\UninstallContext $context)
+    public function uninstall(UninstallContext $context): void
     {
         $tool = new SchemaTool($this->container->get('models'));
         $classes = $this->getModelMetaData();

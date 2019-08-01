@@ -1,15 +1,22 @@
 <?php
+declare(strict_types=1);
+/**
+ * (c) shopware AG <info@shopware.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 use SwagAdvDevBundle\Bundle\StoreFrontBundle\BundleService;
 use SwagAdvDevBundle\Bundle\StoreFrontBundle\Struct\Bundle;
 
 class Shopware_Controllers_Widgets_SwagBundle extends Enlight_Controller_Action
 {
-    public function addBundleAction()
+    public function addBundleAction(): void
     {
-        $bundleId = $this->Request()->getParam('bundleId', null);
-        if (empty($bundleId)) {
-            throw new \Exception('No bundle id passed!');
+        $bundleId = (int) $this->Request()->getParam('bundleId');
+        if ($bundleId === 0) {
+            throw new RuntimeException('No bundle id passed!');
         }
 
         $bundle = new Bundle();

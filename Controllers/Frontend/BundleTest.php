@@ -1,4 +1,11 @@
 <?php
+declare(strict_types=1);
+/**
+ * (c) shopware AG <info@shopware.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 use SwagAdvDevBundle\Components\Api\Resource\Bundle;
 
@@ -6,20 +13,16 @@ use SwagAdvDevBundle\Components\Api\Resource\Bundle;
  * This Controller is a playground for you in order to test you bundle API a bit.
  *
  * THIS IS NOT RELATED TO ANY FUNCTIONALITY OF THE PLUGIN
- *
- * Class Shopware_Controllers_Frontend_BundleTest
  */
 class Shopware_Controllers_Frontend_BundleTest extends Enlight_Controller_Action
 {
     /**
      * Returns an instance of the bundle API
-     *
-     * @return Bundle
      */
-    public function getBundleAPI()
+    public function getBundleAPI(): Bundle
     {
         /** @var Bundle $resource */
-        $resource = \Shopware\Components\Api\Manager::getResource('Bundle');
+        $resource = $this->get('shopware.api.bundle');
 
         return $resource;
     }
@@ -27,15 +30,15 @@ class Shopware_Controllers_Frontend_BundleTest extends Enlight_Controller_Action
     /**
      * Disable the template loading
      */
-    public function preDispatch()
+    public function preDispatch(): void
     {
-        $this->Front()->Plugins()->ViewRenderer()->setNoRender(true);
+        $this->Front()->Plugins()->ViewRenderer()->setNoRender();
     }
 
     /**
      * Create a bundle
      */
-    public function createAction()
+    public function createAction(): void
     {
         $data = [
             'name' => $this->getRandomName(),
@@ -49,9 +52,9 @@ class Shopware_Controllers_Frontend_BundleTest extends Enlight_Controller_Action
     /**
      * Print out bundle with $id
      */
-    public function readAction()
+    public function readAction(): void
     {
-        $bundle = $this->getBundleAPI()->getOne($this->Request()->getParam('id'));
+        $bundle = $this->getBundleAPI()->getOne((int) $this->Request()->getParam('id'));
 
         echo '<pre>';
         print_r($bundle);
@@ -60,9 +63,9 @@ class Shopware_Controllers_Frontend_BundleTest extends Enlight_Controller_Action
     /**
      * List bundles
      */
-    public function listAction()
+    public function listAction(): void
     {
-        $bundles = $this->getBundleAPI()->getList(0, 10, null, null);
+        $bundles = $this->getBundleAPI()->getList();
 
         echo '<pre>';
         print_r($bundles);
@@ -71,9 +74,9 @@ class Shopware_Controllers_Frontend_BundleTest extends Enlight_Controller_Action
     /**
      * Randomly set bundle with $id (in)active
      */
-    public function updateAction()
+    public function updateAction(): void
     {
-        $bundle = $this->getBundleAPI()->update($this->Request()->getParam('id'), ['active' => mt_rand(0, 1)]);
+        $bundle = $this->getBundleAPI()->update((int) $this->Request()->getParam('id'), ['active' => random_int(0, 1)]);
 
         echo $bundle->getActive() ? 'aktiv' : 'inaktiv';
     }
@@ -81,19 +84,17 @@ class Shopware_Controllers_Frontend_BundleTest extends Enlight_Controller_Action
     /**
      * Delete bundle $id
      */
-    public function deleteAction()
+    public function deleteAction(): void
     {
-        $this->getBundleAPI()->delete($this->Request()->getParam('id'));
+        $this->getBundleAPI()->delete((int) $this->Request()->getParam('id'));
 
         echo 'Bundle was deleted';
     }
 
     /**
      * Get a random name for a bundle
-     *
-     * @return string
      */
-    protected function getRandomName()
+    protected function getRandomName(): string
     {
         return array_rand(array_flip([
             'Mein Bundle',

@@ -1,4 +1,11 @@
 <?php
+declare(strict_types=1);
+/**
+ * (c) shopware AG <info@shopware.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace SwagAdvDevBundle\Bundle\StoreFrontBundle\Struct;
 
@@ -27,50 +34,38 @@ class Bundle extends Extendable
      */
     private $legacyProducts = [];
 
-    /**
-     * @return int
-     */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * @param int $id
-     */
-    public function setId($id)
+    public function setId(int $id): void
     {
         $this->id = $id;
     }
 
-    /**
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @param string $name
-     */
-    public function setName($name)
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
 
     /**
-     * @return \array[]
+     * @return array[]
      */
-    public function getLegacyProducts()
+    public function getLegacyProducts(): array
     {
         return $this->legacyProducts;
     }
 
     /**
-     * @param \array[] $legacyProducts
+     * @param array[] $legacyProducts
      */
-    public function setLegacyProducts($legacyProducts)
+    public function setLegacyProducts(array $legacyProducts): void
     {
         $this->legacyProducts = $legacyProducts;
     }
@@ -78,7 +73,7 @@ class Bundle extends Extendable
     /**
      * @return ListProduct[]
      */
-    public function getProducts()
+    public function getProducts(): array
     {
         return $this->products;
     }
@@ -86,7 +81,7 @@ class Bundle extends Extendable
     /**
      * @param ListProduct[] $products
      */
-    public function setProducts($products)
+    public function setProducts(array $products): void
     {
         $this->products = $products;
     }

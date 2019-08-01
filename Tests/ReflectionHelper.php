@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * (c) shopware AG <info@shopware.com>
  *
@@ -10,31 +11,17 @@ namespace SwagAdvDevBundle\Tests;
 
 class ReflectionHelper
 {
-    /**
-     * @param string $class
-     * @param string $method
-     *
-     * @return \ReflectionMethod
-     */
-    public static function getMethod($class, $method)
+    public static function getMethod(string $class, string $methodName): \ReflectionMethod
     {
-        $reflectionClass = new \ReflectionClass($class);
-        $method = $reflectionClass->getMethod($method);
+        $method = (new \ReflectionClass($class))->getMethod($methodName);
         $method->setAccessible(true);
 
         return $method;
     }
 
-    /**
-     * @param string $class
-     * @param string $property
-     *
-     * @return \ReflectionProperty
-     */
-    public static function getProperty($class, $property)
+    public static function getProperty(string $class, string $propertyName): \ReflectionProperty
     {
-        $reflectionClass = new \ReflectionClass($class);
-        $property = $reflectionClass->getProperty($property);
+        $property = (new \ReflectionClass($class))->getProperty($propertyName);
         $property->setAccessible(true);
 
         return $property;

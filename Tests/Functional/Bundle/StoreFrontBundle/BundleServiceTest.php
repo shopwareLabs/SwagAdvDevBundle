@@ -1,38 +1,41 @@
 <?php
+declare(strict_types=1);
+/**
+ * (c) shopware AG <info@shopware.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace SwagAdvDevBundle\Tests\Functional\Bundle\StoreFrontBundle;
 
 use Doctrine\DBAL\Query\QueryBuilder;
+use PHPUnit\Framework\TestCase;
 use Shopware\Bundle\StoreFrontBundle\Service\Core\ContextService;
-use Shopware\Bundle\StoreFrontBundle\Struct\ShopContext;
+use Shopware\Bundle\StoreFrontBundle\Struct\ShopContextInterface;
 use SwagAdvDevBundle\Bundle\StoreFrontBundle\BundleService;
 use SwagAdvDevBundle\Bundle\StoreFrontBundle\Struct\Bundle;
-use SwagAdvDevBundle\Tests\KernelTestCaseTrait;
 
-class BundleServiceTest extends \PHPUnit\Framework\TestCase
+class BundleServiceTest extends TestCase
 {
-    use KernelTestCaseTrait;
-
-    public function test_getProductBundles()
+    public function testGetProductBundles(): void
     {
         /** @var QueryBuilder $builder */
         $builder = Shopware()->Container()->get('dbal_connection')->createQueryBuilder();
-        $productId = $builder->select('product_id')
+        $productId = (int) $builder->select('product_id')
             ->from('s_bundle_products')
             ->setMaxResults(1)
             ->execute()
             ->fetchColumn();
 
         $context = $this->getContext();
-        $service = $this->getService();
+        $result = $this->getService()->getProductBundles($productId, $context);
 
-        $result = $service->getProductBundles($productId, $context);
-
-        $this->assertTrue(is_array($result));
-        $this->assertInstanceOf(Bundle::class, $result[0]);
+        static::assertInternalType('array', $result);
+        static::assertInstanceOf(Bundle::class, $result[0]);
     }
 
-    public function test_getProductNumbersByBundle()
+    public function testGetProductNumbersByBundle(): void
     {
         $service = $this->getService();
         $bundle = new Bundle();
@@ -40,14 +43,10 @@ class BundleServiceTest extends \PHPUnit\Framework\TestCase
 
         $result = $service->getProductNumbersByBundle($bundle);
 
-        $this->assertTrue(is_array($result));
-        $this->assertNotEmpty($result);
+        static::assertNotEmpty($result);
     }
 
-    /**
-     * @return \Shopware\Bundle\StoreFrontBundle\Struct\ProductContextInterface|ShopContext
-     */
-    private function getContext()
+    private function getContext(): ShopContextInterface
     {
         /** @var ContextService $contextService */
         $contextService = Shopware()->Container()->get('shopware_storefront.context_service');
@@ -55,10 +54,7 @@ class BundleServiceTest extends \PHPUnit\Framework\TestCase
         return $contextService->createShopContext(1);
     }
 
-    /**
-     * @return BundleService
-     */
-    private function getService()
+    private function getService(): BundleService
     {
         return new BundleService(
             Shopware()->Container()->get('dbal_connection'),

@@ -1,18 +1,23 @@
 <?php
+declare(strict_types=1);
+/**
+ * (c) shopware AG <info@shopware.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace SwagAdvDevBundle\Tests\Functional\Bundle\SearchBundle;
 
+use PHPUnit\Framework\TestCase;
 use Shopware\Bundle\SearchBundle\Criteria;
 use Shopware\Bundle\StoreFrontBundle\Service\Core\ContextService;
 use SwagAdvDevBundle\Bundle\SearchBundle\Condition\BundleCondition;
 use SwagAdvDevBundle\Bundle\SearchBundle\CriteriaRequestHandler;
-use SwagAdvDevBundle\Tests\KernelTestCaseTrait;
 
-class CriteriaRequestHandlerTest extends \PHPUnit\Framework\TestCase
+class CriteriaRequestHandlerTest extends TestCase
 {
-    use KernelTestCaseTrait;
-
-    public function test_handleRequest_should_be_false()
+    public function testHandleRequestShouldBeFalse(): void
     {
         $handler = new CriteriaRequestHandler();
         $request = new \Enlight_Controller_Request_RequestHttp();
@@ -30,10 +35,10 @@ class CriteriaRequestHandlerTest extends \PHPUnit\Framework\TestCase
 
         $result = $criteria->hasConditionOfClass(BundleCondition::class);
 
-        $this->assertFalse($result);
+        static::assertFalse($result);
     }
 
-    public function test_handleRequest_should_be_true()
+    public function testHandleRequestShouldBeTrue(): void
     {
         $handler = new CriteriaRequestHandler();
 
@@ -53,6 +58,6 @@ class CriteriaRequestHandlerTest extends \PHPUnit\Framework\TestCase
 
         $result = $criteria->hasConditionOfClass(BundleCondition::class);
 
-        $this->assertTrue($result);
+        static::assertTrue($result);
     }
 }

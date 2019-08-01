@@ -1,8 +1,16 @@
 <?php
+declare(strict_types=1);
+/**
+ * (c) shopware AG <info@shopware.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace SwagAdvDevBundle\Components\Api\Resource;
 
-use Shopware\Components\Api\Exception as ApiException;
+use Shopware\Components\Api\Exception\NotFoundException;
+use Shopware\Components\Api\Exception\ValidationException;
 use Shopware\Components\Api\Resource\Resource;
 use Shopware\Components\Model\QueryBuilder;
 use Shopware\Models\Article\Article;
@@ -10,15 +18,7 @@ use SwagAdvDevBundle\Models\Bundle as BundleModel;
 
 class Bundle extends Resource
 {
-    /**
-     * @param $offset
-     * @param $limit
-     * @param $filter
-     * @param $sort
-     *
-     * @return array
-     */
-    public function getList($offset, $limit, $filter, $sort)
+    public function getList(int $offset = 0, int $limit = 10, ?array $filter = null, ?array $sort = null): array
     {
         $builder = $this->getBaseQuery();
         $builder = $this->addQueryLimit($builder, $offset, $limit);
@@ -44,37 +44,31 @@ class Bundle extends Resource
     }
 
     /**
-     * @param $id
+     * @throws NotFoundException
      *
-     * @throws ApiException\NotFoundException
-     *
-     * @return BundleModel
+     * @return BundleModel|array
      */
-    public function getOne($id)
+    public function getOne(int $id)
     {
         $builder = $this->getBaseQuery();
 
         $builder->where('bundle.id = :id')
             ->setParameter('id', $id);
 
-        /** @var $bundle BundleModel */
+        /** @var BundleModel|array $bundle */
         $bundle = $builder->getQuery()->getOneOrNullResult($this->getResultMode());
 
         if (!$bundle) {
-            throw new ApiException\NotFoundException("Bundle by id $id not found");
+            throw new NotFoundException("Bundle by id $id not found");
         }
 
         return $bundle;
     }
 
     /**
-     * @param $data
-     *
-     * @throws ApiException\ValidationException
-     *
-     * @return BundleModel
+     * @throws ValidationException
      */
-    public function create($data)
+    public function create(array $data): BundleModel
     {
         $data = $this->prepareBundleData($data);
 
@@ -84,7 +78,7 @@ class Bundle extends Resource
         $violations = $this->getManager()->validate($bundle);
 
         if ($violations->count() > 0) {
-            throw new ApiException\ValidationException($violations);
+            throw new ValidationException($violations);
         }
 
         $this->getManager()->persist($bundle);
@@ -94,26 +88,16 @@ class Bundle extends Resource
     }
 
     /**
-     * @param $id
-     * @param array $data
-     *
-     * @throws ApiException\NotFoundException
-     * @throws ApiException\ParameterMissingException
-     * @throws ApiException\ValidationException
-     *
-     * @return BundleModel
+     * @throws NotFoundException
+     * @throws ValidationException
      */
-    public function update($id, array $data)
+    public function update(int $id, array $data): BundleModel
     {
-        if (empty($id)) {
-            throw new ApiException\ParameterMissingException();
-        }
-
-        /** @var $bundle BundleModel */
+        /** @var BundleModel $bundle */
         $bundle = $this->getManager()->find(BundleModel::class, $id);
 
         if (!$bundle) {
-            throw new ApiException\NotFoundException("Bundle by id $id not found");
+            throw new NotFoundException("Bundle by id $id not found");
         }
 
         $data = $this->prepareBundleData($data);
@@ -121,7 +105,7 @@ class Bundle extends Resource
 
         $violations = $this->getManager()->validate($bundle);
         if ($violations->count() > 0) {
-            throw new ApiException\ValidationException($violations);
+            throw new ValidationException($violations);
         }
 
         $this->flush();
@@ -130,22 +114,15 @@ class Bundle extends Resource
     }
 
     /**
-     * @param $id
-     *
-     * @throws ApiException\NotFoundException
-     * @throws ApiException\ParameterMissingException
+     * @throws NotFoundException
      */
-    public function delete($id)
+    public function delete(int $id): void
     {
-        if (empty($id)) {
-            throw new ApiException\ParameterMissingException();
-        }
-
-        /** @var $bundle BundleModel */
+        /** @var BundleModel $bundle */
         $bundle = $this->getManager()->find(BundleModel::class, $id);
 
         if (!$bundle) {
-            throw new ApiException\NotFoundException("Bundle by id $id not found");
+            throw new NotFoundException("Bundle by id $id not found");
         }
 
         $this->getManager()->remove($bundle);
@@ -153,13 +130,11 @@ class Bundle extends Resource
     }
 
     /**
-     * @param array $data
+     * @param array[] $data
      *
-     * @throws ApiException\NotFoundException
-     *
-     * @return array
+     * @throws NotFoundException
      */
-    protected function prepareBundleData(array $data)
+    protected function prepareBundleData(array $data): array
     {
         if (!array_key_exists('products', $data)) {
             return $data;
@@ -169,7 +144,7 @@ class Bundle extends Resource
         foreach ($data['products'] as $productId) {
             $product = $this->getManager()->find(Article::class, $productId);
             if (!$product instanceof Article) {
-                throw new ApiException\NotFoundException("Product by id $productId not found");
+                throw new NotFoundException("Product by id $productId not found");
             }
             $products[] = $product;
         }
@@ -178,14 +153,7 @@ class Bundle extends Resource
         return $data;
     }
 
-    /**
-     * @param QueryBuilder $builder
-     * @param              $offset
-     * @param null         $limit
-     *
-     * @return QueryBuilder
-     */
-    protected function addQueryLimit(QueryBuilder $builder, $offset, $limit = null)
+    protected function addQueryLimit(QueryBuilder $builder, int $offset, ?int $limit = null): QueryBuilder
     {
         $builder->setFirstResult($offset)
             ->setMaxResults($limit);
@@ -193,10 +161,7 @@ class Bundle extends Resource
         return $builder;
     }
 
-    /**
-     * @return \Doctrine\ORM\QueryBuilder|QueryBuilder
-     */
-    protected function getBaseQuery()
+    protected function getBaseQuery(): QueryBuilder
     {
         $builder = $this->getManager()->createQueryBuilder();
         $builder->select(['bundle', 'products'])

@@ -1,4 +1,11 @@
 <?php
+declare(strict_types=1);
+/**
+ * (c) shopware AG <info@shopware.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace SwagAdvDevBundle\Bundle\SearchBundle;
 
@@ -11,14 +18,11 @@ use SwagAdvDevBundle\Bundle\SearchBundle\Facet\BundleFacet;
 
 class CriteriaRequestHandler implements CriteriaRequestHandlerInterface
 {
-    /**
-     * {@inheritdoc}
-     */
     public function handleRequest(
         Request $request,
         Criteria $criteria,
         ShopContextInterface $context
-    ) {
+    ): void {
         if ($request->has('bundle')) {
             $criteria->addCondition(new BundleCondition());
         }

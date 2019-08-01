@@ -1,4 +1,11 @@
 <?php
+declare(strict_types=1);
+/**
+ * (c) shopware AG <info@shopware.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace SwagAdvDevBundle\Bundle\StoreFrontBundle;
 
@@ -24,11 +31,6 @@ class BundleService
      */
     private $structConverter;
 
-    /**
-     * @param Connection                  $connection
-     * @param ListProductServiceInterface $listProductService
-     * @param LegacyStructConverter       $structConverter
-     */
     public function __construct(
         Connection $connection,
         ListProductServiceInterface $listProductService,
@@ -40,12 +42,9 @@ class BundleService
     }
 
     /**
-     * @param string               $productId
-     * @param ShopContextInterface $context
-     *
      * @return Struct\Bundle[]
      */
-    public function getProductBundles($productId, ShopContextInterface $context)
+    public function getProductBundles(int $productId, ShopContextInterface $context): array
     {
         $bundles = $this->getBundlesByProductId($productId);
 
@@ -63,12 +62,7 @@ class BundleService
         return $bundles;
     }
 
-    /**
-     * @param Struct\Bundle $bundle
-     *
-     * @return array
-     */
-    public function getProductNumbersByBundle(Struct\Bundle $bundle)
+    public function getProductNumbersByBundle(Struct\Bundle $bundle): array
     {
         $builder = $this->connection->createQueryBuilder();
         $builder->select('ordernumber')
@@ -83,11 +77,9 @@ class BundleService
     }
 
     /**
-     * @param int $productId
-     *
      * @return Struct\Bundle[]
      */
-    private function getBundlesByProductId($productId)
+    private function getBundlesByProductId(int $productId): array
     {
         $builder = $this->connection->createQueryBuilder();
         $builder->select(['id', 'name'])
@@ -101,7 +93,7 @@ class BundleService
 
         foreach ($result as $row) {
             $bundle = new Struct\Bundle();
-            $bundle->setId($row['id']);
+            $bundle->setId((int) $row['id']);
             $bundle->setName($row['name']);
 
             $bundles[] = $bundle;

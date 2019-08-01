@@ -1,12 +1,20 @@
 <?php
+declare(strict_types=1);
+/**
+ * (c) shopware AG <info@shopware.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace SwagAdvDevBundle\Bundle\SearchBundleDBAL\Facet;
 
+use Doctrine\DBAL\Driver\ResultStatement;
 use Shopware\Bundle\SearchBundle\Criteria;
 use Shopware\Bundle\SearchBundle\FacetInterface;
 use Shopware\Bundle\SearchBundle\FacetResult\BooleanFacetResult;
 use Shopware\Bundle\SearchBundleDBAL\PartialFacetHandlerInterface;
-use Shopware\Bundle\SearchBundleDBAL\QueryBuilderFactory;
+use Shopware\Bundle\SearchBundleDBAL\QueryBuilderFactoryInterface;
 use Shopware\Bundle\StoreFrontBundle\Struct\ShopContextInterface;
 use SwagAdvDevBundle\Bundle\SearchBundle\Condition\BundleCondition;
 use SwagAdvDevBundle\Bundle\SearchBundle\Facet\BundleFacet;
@@ -14,29 +22,20 @@ use SwagAdvDevBundle\Bundle\SearchBundle\Facet\BundleFacet;
 class BundleFacetHandler implements PartialFacetHandlerInterface
 {
     /**
-     * @var QueryBuilderFactory
+     * @var QueryBuilderFactoryInterface
      */
     private $queryBuilderFactory;
 
-    /**
-     * @param QueryBuilderFactory $queryBuilderFactory
-     */
-    public function __construct(QueryBuilderFactory $queryBuilderFactory)
+    public function __construct(QueryBuilderFactoryInterface $queryBuilderFactory)
     {
         $this->queryBuilderFactory = $queryBuilderFactory;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function supportsFacet(FacetInterface $facet)
+    public function supportsFacet(FacetInterface $facet): bool
     {
         return $facet instanceof BundleFacet;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function generatePartialFacet(
         FacetInterface $facet,
         Criteria $reverted,
@@ -53,7 +52,7 @@ class BundleFacetHandler implements PartialFacetHandlerInterface
             )
             ->setMaxResults(1);
 
-        /** @var \Doctrine\DBAL\Driver\ResultStatement $statement */
+        /** @var ResultStatement $statement */
         $statement = $query->execute();
         $total = $statement->fetch(\PDO::FETCH_COLUMN);
         //found some products?

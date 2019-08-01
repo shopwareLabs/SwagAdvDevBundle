@@ -1,39 +1,42 @@
 <?php
+declare(strict_types=1);
+/**
+ * (c) shopware AG <info@shopware.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace SwagAdvDevBundle\Tests\Functional\Components\Api\Resource;
 
+use PHPUnit\Framework\TestCase;
 use Shopware\Components\Api\Exception\NotFoundException;
-use Shopware\Components\Api\Exception\ParameterMissingException;
 use Shopware\Components\Api\Exception\ValidationException;
 use Shopware\Components\Model\QueryBuilder;
 use Shopware\Models\Article\Article;
 use SwagAdvDevBundle\Components\Api\Resource\Bundle;
-use SwagAdvDevBundle\Tests\KernelTestCaseTrait;
+use SwagAdvDevBundle\Tests\Functional\Components\Api\Resource\Mock\ManagerMock;
+use SwagAdvDevBundle\Tests\Functional\DatabaseTestCaseTrait;
 use SwagAdvDevBundle\Tests\ReflectionHelper;
-use Symfony\Component\Validator\ConstraintViolation;
-use Symfony\Component\Validator\ConstraintViolationInterface;
-use Symfony\Component\Validator\ConstraintViolationList;
-use Symfony\Component\Validator\ConstraintViolationListInterface;
 
-class BundleTest extends \PHPUnit\Framework\TestCase
+class BundleTest extends TestCase
 {
-    use KernelTestCaseTrait;
+    use DatabaseTestCaseTrait;
 
-    public function test_getList()
+    public function testGetList(): void
     {
         $resource = $this->getResource();
 
         $limit = 3;
-        $result = $resource->getList(0, $limit, null, null);
+        $result = $resource->getList(0, $limit);
 
         $expectedSubset = ['data' => [], 'total' => 19];
 
-        $this->assertTrue(is_array($result));
-        $this->assertArraySubset($expectedSubset, $result);
-        $this->assertCount($limit, $result['data']);
+        static::assertArraySubset($expectedSubset, $result);
+        static::assertCount($limit, $result['data']);
     }
 
-    public function test_getOne_expects_exception()
+    public function testGetOneExpectsException(): void
     {
         $resource = $this->getResource();
         $id = 122; // not existent id
@@ -43,7 +46,7 @@ class BundleTest extends \PHPUnit\Framework\TestCase
         $resource->getOne($id);
     }
 
-    public function test_getOne()
+    public function testGetOne(): void
     {
         $resource = $this->getResource();
         $id = 2;
@@ -57,11 +60,11 @@ class BundleTest extends \PHPUnit\Framework\TestCase
             'products' => [],
         ];
 
-        $this->assertTrue(is_array($result));
-        $this->assertArraySubset($expectedSubset, $result);
+        static::assertInternalType('array', $result);
+        static::assertArraySubset($expectedSubset, $result);
     }
 
-    public function test_create()
+    public function testCreate(): void
     {
         $data = [
             'active' => true,
@@ -89,10 +92,10 @@ class BundleTest extends \PHPUnit\Framework\TestCase
             ],
         ];
 
-        $this->assertArraySubset($expectedSubsetResult, $result);
+        static::assertArraySubset($expectedSubsetResult, $result);
     }
 
-    public function test_update()
+    public function testUpdate(): void
     {
         $id = 5;
         $newName = 'This is simple test';
@@ -112,19 +115,10 @@ class BundleTest extends \PHPUnit\Framework\TestCase
         $sql = 'SELECT `name` FROM s_bundles WHERE id = 5';
         $result = Shopware()->Container()->get('dbal_connection')->fetchColumn($sql);
 
-        $this->assertSame($newName, $result);
+        static::assertSame($newName, $result);
     }
 
-    public function test_update_expects_ParameterMissingException()
-    {
-        $resource = $this->getResource();
-
-        $this->expectException(ParameterMissingException::class);
-
-        $resource->update(null, []);
-    }
-
-    public function test_update_expects_NotFoundException()
+    public function testUpdateExpectsNotFoundException(): void
     {
         $resource = $this->getResource();
 
@@ -133,7 +127,7 @@ class BundleTest extends \PHPUnit\Framework\TestCase
         $resource->update(999, []);
     }
 
-    public function test_update_expects_ValidationException()
+    public function testUpdateExpectsValidationException(): void
     {
         $resource = $this->getResource();
 
@@ -144,7 +138,7 @@ class BundleTest extends \PHPUnit\Framework\TestCase
         $resource->update(5, ['products' => []]);
     }
 
-    public function test_delete()
+    public function testDelete(): void
     {
         $data = [
             'active' => true,
@@ -159,25 +153,16 @@ class BundleTest extends \PHPUnit\Framework\TestCase
         $resource->create($data);
 
         $sql = 'SELECT id FROM s_bundles WHERE `name` LIKE "Bundle to delete"';
-        $id = Shopware()->Container()->get('dbal_connection')->fetchColumn($sql);
+        $id = (int) Shopware()->Container()->get('dbal_connection')->fetchColumn($sql);
 
         $resource->delete($id);
 
         $result = Shopware()->Container()->get('dbal_connection')->fetchColumn($sql);
 
-        $this->assertFalse($result);
+        static::assertFalse($result);
     }
 
-    public function test_delete_expects_ParameterMissingException()
-    {
-        $resource = $this->getResource();
-
-        $this->expectException(ParameterMissingException::class);
-
-        $resource->delete(null);
-    }
-
-    public function test_delete_expects_NotFoundException()
+    public function testDeleteExpectsNotFoundException(): void
     {
         $resource = $this->getResource();
 
@@ -186,7 +171,7 @@ class BundleTest extends \PHPUnit\Framework\TestCase
         $resource->delete(9999);
     }
 
-    public function test_prepareBundleData_expects_NotFoundException()
+    public function testPrepareBundleDataExpectsNotFoundException(): void
     {
         $data = [
             'active' => true,
@@ -206,7 +191,7 @@ class BundleTest extends \PHPUnit\Framework\TestCase
         $method->invokeArgs($resource, [$data]);
     }
 
-    public function test_prepareBundleData()
+    public function testPrepareBundleData(): void
     {
         $data = [
             'active' => true,
@@ -219,8 +204,7 @@ class BundleTest extends \PHPUnit\Framework\TestCase
 
         $resource = $this->getResource();
 
-        $method = ReflectionHelper::getMethod(Bundle::class, 'prepareBundleData');
-        $result = $method->invokeArgs($resource, [$data]);
+        $result = ReflectionHelper::getMethod(Bundle::class, 'prepareBundleData')->invokeArgs($resource, [$data]);
 
         $expectedSubset = [
             'active' => true,
@@ -229,12 +213,12 @@ class BundleTest extends \PHPUnit\Framework\TestCase
             'products' => [],
         ];
 
-        $this->assertTrue(is_array($result));
-        $this->assertArraySubset($expectedSubset, $result);
-        $this->assertInstanceOf(Article::class, $result['products'][0]);
+        static::assertInternalType('array', $result);
+        static::assertArraySubset($expectedSubset, $result);
+        static::assertInstanceOf(Article::class, $result['products'][0]);
     }
 
-    public function test_addQueryLimit()
+    public function testAddQueryLimit(): void
     {
         $resource = $this->getResource();
 
@@ -246,10 +230,10 @@ class BundleTest extends \PHPUnit\Framework\TestCase
 
         $result = $method->invokeArgs($resource, [$queryBuilder, 10, 100]);
 
-        $this->assertInstanceOf(QueryBuilder::class, $result);
+        static::assertInstanceOf(QueryBuilder::class, $result);
     }
 
-    public function test_getBaseQuery()
+    public function testGetBaseQuery(): void
     {
         $resource = $this->getResource();
 
@@ -266,40 +250,16 @@ class BundleTest extends \PHPUnit\Framework\TestCase
 
         $result = $method->invoke($resource);
 
-        $this->assertInstanceOf(QueryBuilder::class, $result);
-        $this->assertArraySubset($expectedSubset, $result->getDQLParts());
+        static::assertInstanceOf(QueryBuilder::class, $result);
+        static::assertArraySubset($expectedSubset, $result->getDQLParts());
     }
 
-    private function getResource()
+    private function getResource(): Bundle
     {
         $bundle = new Bundle();
 
         $bundle->setManager(Shopware()->Models());
 
         return $bundle;
-    }
-}
-
-class ManagerMock
-{
-    public function find($entityName, $id)
-    {
-        return Shopware()->Models()->find($entityName, $id);
-    }
-
-    public function validate($object)
-    {
-        $violationList = new ConstraintViolationList();
-        $constraintViolation = new ConstraintViolation(
-            'test',
-            'foo',
-            [],
-            'bar',
-            'fooBar',
-            'invalid'
-        );
-        $violationList->add($constraintViolation);
-
-        return $violationList;
     }
 }

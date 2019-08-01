@@ -1,4 +1,11 @@
 <?php
+declare(strict_types=1);
+/**
+ * (c) shopware AG <info@shopware.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace SwagAdvDevBundle;
 
@@ -17,10 +24,7 @@ class SwagAdvDevBundle extends Plugin
         ];
     }
 
-    /**
-     * @param \Enlight_Controller_ActionEventArgs $args
-     */
-    public function addTemplateDir(\Enlight_Controller_ActionEventArgs $args)
+    public function addTemplateDir(\Enlight_Controller_ActionEventArgs $args): void
     {
         $args->getSubject()->View()->addTemplateDir($this->getPath() . '/Resources/views');
     }
@@ -43,7 +47,7 @@ class SwagAdvDevBundle extends Plugin
         $tool->dropSchema($classes);
     }
 
-    private function updateSchema()
+    private function updateSchema(): void
     {
         $tool = new SchemaTool($this->container->get('models'));
         $classes = $this->getModelMetaData();
@@ -57,15 +61,12 @@ class SwagAdvDevBundle extends Plugin
         $this->createDemoData();
     }
 
-    /**
-     * @return array
-     */
-    private function getModelMetaData()
+    private function getModelMetaData(): array
     {
         return [$this->container->get('models')->getClassMetadata(Models\Bundle::class)];
     }
 
-    private function createDemoData()
+    private function createDemoData(): void
     {
         $connection = $this->container->get('dbal_connection');
 
@@ -86,7 +87,7 @@ class SwagAdvDevBundle extends Plugin
             );
             $bundleId = $connection->lastInsertId('s_bundles');
 
-            $products = $connection->executeQuery('SELECT id FROM s_articles ORDER BY RAND() LIMIT ' . mt_rand(4, 5))
+            $products = $connection->executeQuery('SELECT id FROM s_articles ORDER BY RAND() LIMIT ' . random_int(4, 5))
                 ->fetchAll(\PDO::FETCH_COLUMN);
             foreach ($products as $product) {
                 $productInsert->execute([':bundleId' => $bundleId, ':productId' => $product]);

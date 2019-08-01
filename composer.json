@@ -1,5 +1,6 @@
 {
-    "name": "shopware/SwagAdvDevBundle",
+    "name": "shopware-labs/adv-dev-bundle",
+    "license": "MIT",
     "require-dev": {
         "shopware/plugin-dev-tools": "master-dev"
     },

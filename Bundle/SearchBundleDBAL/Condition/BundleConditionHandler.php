@@ -1,4 +1,11 @@
 <?php
+declare(strict_types=1);
+/**
+ * (c) shopware AG <info@shopware.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace SwagAdvDevBundle\Bundle\SearchBundleDBAL\Condition;
 
@@ -10,22 +17,16 @@ use SwagAdvDevBundle\Bundle\SearchBundle\Condition\BundleCondition;
 
 class BundleConditionHandler implements ConditionHandlerInterface
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function supportsCondition(ConditionInterface $condition)
+    public function supportsCondition(ConditionInterface $condition): bool
     {
         return $condition instanceof BundleCondition;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function generateCondition(
         ConditionInterface $condition,
         QueryBuilder $query,
         ShopContextInterface $context
-    ) {
+    ): void {
         $query->innerJoin(
             'product',
             's_bundle_products',

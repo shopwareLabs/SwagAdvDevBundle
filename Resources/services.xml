@@ -1,0 +1,42 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <service id="shopware.api.bundle" class="SwagAdvDevBundle\Components\Api\Resource\Bundle"/>
+
+        <service id="swag_bundle.bundle_service"
+                 class="SwagAdvDevBundle\Bundle\StoreFrontBundle\BundleService">
+            <argument type="service" id="dbal_connection" />
+            <argument type="service" id="swag_bundle.list_product_service.inner" />
+            <argument type="service" id="legacy_struct_converter"/>
+        </service>
+
+        <service id="swag_bundle.list_product_service"
+                 class="SwagAdvDevBundle\Bundle\StoreFrontBundle\ListProductServiceDecorator"
+                 decorates="shopware_storefront.list_product_service"
+                 public="false">
+            <argument type="service" id="swag_bundle.list_product_service.inner"/>
+            <argument type="service" id="swag_bundle.bundle_service"/>
+        </service>
+
+        <service id="swag_bundle.bundle_criteria_request_handler"
+                 class="SwagAdvDevBundle\Bundle\SearchBundle\CriteriaRequestHandler">
+            <tag name="criteria_request_handler" />
+        </service>
+
+        <service id="swag_bundle.bundle_condition_handler"
+                 class="SwagAdvDevBundle\Bundle\SearchBundleDBAL\Condition\BundleConditionHandler">
+            <tag name="condition_handler_dbal" />
+        </service>
+
+        <service id="swag_bundle.bundle_facet_handler"
+                 class="SwagAdvDevBundle\Bundle\SearchBundleDBAL\Facet\BundleFacetHandler">
+            <argument type="service" id="shopware_searchdbal.dbal_query_builder_factory" />
+            <tag name="facet_handler_dbal" />
+        </service>
+
+    </services>
+</container>
